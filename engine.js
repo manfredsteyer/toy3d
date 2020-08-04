@@ -52,6 +52,7 @@ let coords;
 let areas;
 let recommentedDistance;
 let coords3dTransformed;
+let animationStarted = false;
 
 function toPoint3d(x, y, z) {
     return { x, y, z }
@@ -59,7 +60,6 @@ function toPoint3d(x, y, z) {
 
 // https://de.wikipedia.org/wiki/Drehmatrix
 function rotateX(point3d, alpha) {
-
     const sina = Math.sin(alpha);
     const cosa = Math.cos(alpha);
 
@@ -71,7 +71,6 @@ function rotateX(point3d, alpha) {
 }
 
 function rotateY(point3d, alpha) {
-
     const sina = Math.sin(alpha);
     const cosa = Math.cos(alpha);
 
@@ -84,7 +83,6 @@ function rotateY(point3d, alpha) {
 
 // https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_olcEngine3D_Part2.cpp
 function crossProduct(point3d_1, point3d_2, point3d_3) {
-
     const line1 = {
         x: point3d_2.x - point3d_1.x,
         y: point3d_2.y - point3d_1.y,
@@ -228,22 +226,40 @@ function render() {
     } 
 }
 
-document.addEventListener('keydown', event => {
-    console.debug('e', event);
-    switch (event.key) {
+function startAnimation() {
+    animationStarted = true;
+    animate();
+}
+
+function stopAnimation() {
+    animationStarted = false;
+}
+
+function animate() {
+    if (!animationStarted) return;
+
+    rotation.ay += Math.PI / 180 *2;
+    render();
+
+    window.requestAnimationFrame(event => {
+        animate();        
+    });
+}
+
+function handleInput(key) {
+    switch (key) {
         case 'ArrowLeft':
             rotation.ay += Math.PI / 180 *2;
-        break;
+            break;
         case 'ArrowRight':
             rotation.ay -= Math.PI / 180 *2;
-        break;
+            break;
         case 'ArrowUp':
             rotation.ax -= Math.PI / 180 *2;
-        break;
+            break;
         case 'ArrowDown':
             rotation.ax += Math.PI / 180 *2;
-        break;
-
+            break;
         case '+':
             camera.z -= 0.2;
             break;
@@ -255,8 +271,14 @@ document.addEventListener('keydown', event => {
             rotation.ax = 0;
             rotation.ay = 0;
             break;
-        default: return
+        default: 
+            return;
     }
     
     render();
-});
+}
+
+document.addEventListener(
+    'keydown', 
+    event => handleInput(event.key));
+
