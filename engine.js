@@ -252,6 +252,8 @@ document.addEventListener('keydown', event => {
             break;
         case '0':
             camera.z = recommentedDistance;
+            rotation.ax = 0;
+            rotation.ay = 0;
             break;
         default: return
     }
