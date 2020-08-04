@@ -228,6 +228,7 @@ function render() {
 
 function startAnimation() {
     animationStarted = true;
+    camera.z = recommentedDistance;
     animate();
 }
 
