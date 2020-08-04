@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toy3D</title>
+    <style>
+        canvas {
+            border: 1px black solid;
+        }
+    </style>
+    
+
+</head>
+<body>
+
+
+
+    <canvas width="300" height="300" id="canvas"></canvas>
+    
+
+    <script>
+
+
+        function toPoint3d(x, y, z) {
+            return { x, y, z }
+        }
+
+        const displaySurface = toPoint3d(0, 0, 0.5);
+
+        const camera = {
+            x: 0, 
+            y: 0, 
+            z: 3,
+            ox: 0,
+            oy: 0,
+            oz: 0
+        }
+
+        function rotateX(point3d, alpha) {
+
+            const sina = Math.sin(alpha);
+            const cosa = Math.cos(alpha);
+
+            const x = point3d.x;
+            const y = point3d.y * cosa - point3d.z * sina;
+            const z = point3d.y * sina + point3d.z * cosa;
+
+            return { x, y, z }; 
+        }
+
+        function rotateY(point3d, alpha) {
+
+            const sina = Math.sin(alpha);
+            const cosa = Math.cos(alpha);
+
+            const x = point3d.x * cosa + point3d.z * sina;
+            const y = point3d.y;
+            const z = point3d.x * -sina + point3d.z * cosa; 
+
+            return { x, y, z }; 
+        }
+
+
+
+        const coords = [
+            toPoint3d(1, -1, -1), //1
+            toPoint3d(1, -1, 1), //2
+            toPoint3d(-1, -1, 1), //3
+            toPoint3d(-1, -1, -1), //4
+            toPoint3d(1, 1, -1), //5
+            toPoint3d(1, 1, 1), //6
+            toPoint3d(-1, 1, 1), //7
+            toPoint3d(-1, 1, -1) //8
+        ];
+
+        const areas =  [ 
+            [1, 2, 3, 4],
+            [5, 8, 7, 6],
+            [5, 8, 4, 1],
+            [1, 5, 6, 2],
+            [2, 6, 7, 3],
+            [3, 7, 8, 4]
+        ]
+
+        
+
+        // https://en.wikipedia.org/wiki/3D_projection
+        function project(point3d) {
+            const x = point3d.x - camera.x;
+            const y = point3d.y - camera.y;
+            const z = point3d.z - camera.z;
+
+            const ex = displaySurface.x;
+            const ey = displaySurface.y;
+            const ez = displaySurface.z;
+
+            const sx = Math.sin(camera.ox);
+            const sy = Math.sin(camera.oy);
+            const sz = Math.sin(camera.oz);
+
+            const cx = Math.cos(camera.ox);
+            const cy = Math.cos(camera.oy);
+            const cz = Math.cos(camera.oz);
+
+            const dx = cy * (sz*y+cz*x) - sy*z;
+            const dy = sx * (cy*z+sy*(sz*y+cz*x)) + cx * (cz*y-sz*x);
+            let dz = cx * (cy*z+sy*(sz*y+cz*x)) - sx * (cz*y-sz*x);
+
+            //dz = dz + 0.1;
+
+            const bx = (ez/dz) * dx + ex;
+            const by = (ez/dz) * dy + ey;
+
+            // const bx = dx / dz;
+            // const by = dy / dz;
+
+
+            return { x: bx, y: by };
+        }
+        
+        const canvas = {
+            width: 150,
+            height: 150,
+            border: 25
+        }
+
+        function toCanvasPoint(point2d) {
+            const x = Math.round(point2d.x * canvas.width + canvas.width /*+  canvas.border*/); 
+            const y = Math.round(point2d.y * canvas.height + canvas.height /*+  canvas.border*/); 
+            return { x, y };
+        }
+
+        const ctx = document.getElementById('canvas').getContext('2d');
+
+        const rotation = {
+            ay: 0,
+            ax: 0
+        }
+
+        function render() {
+            
+
+            const coords2d = coords.map(coord => {
+                coord = rotateY(coord, rotation.ay);
+                coord = rotateX(coord, rotation.ax)
+
+                const point2d = project(coord);
+                console.debug('point2d', point2d);
+                return toCanvasPoint(point2d);
+            });
+
+            for (area of areas) {
+                ctx.beginPath();
+                ctx.moveTo(coords2d[area[0]-1].x, coords2d[area[0]-1].y);
+                ctx.lineTo(coords2d[area[1]-1].x, coords2d[area[1]-1].y);
+                ctx.lineTo(coords2d[area[2]-1].x, coords2d[area[2]-1].y);
+                ctx.lineTo(coords2d[area[3]-1].x, coords2d[area[3]-1].y);
+                ctx.closePath();
+                ctx.stroke();
+            } 
+
+            // for (coord of coords) {
+
+            //     coord = rotateY(coord, 0)
+            //     const point2d = project(coord);
+            //     console.debug('point2d', point2d);
+            //     const {x, y} = toCanvasPoint(point2d);
+            //     // ctx.beginPath();
+            //     // ctx.arc(x, y, 3, 0, Math.PI * 2);
+            //     // ctx.stroke();
+            // }
+        }
+
+        render();
+
+        document.addEventListener('keydown', event => {
+
+
+            switch (event.key) {
+                case 'ArrowLeft':
+                    rotation.ay += Math.PI / 180;
+                break;
+                case 'ArrowRight':
+                    rotation.ay -= Math.PI / 180;
+                break;
+                case 'ArrowUp':
+                    rotation.ax -= Math.PI / 180;
+                break;
+                case 'ArrowDown':
+                    rotation.ax += Math.PI / 180;
+                break;
+                default: return
+            }
+
+            
+            ctx.clearRect(0, 0, 2000, 2000);
+            render();
+        });
+
+
+    </script>
+
+</body>
+</html>
