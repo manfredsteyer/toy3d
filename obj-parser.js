@@ -1,5 +1,3 @@
-
-
 function parseObj(content) {
     const coords = [];
     const areas = [];
