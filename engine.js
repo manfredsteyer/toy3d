@@ -126,6 +126,7 @@ function load(parsedFile) {
     rotation.ax = 0;
     rotation.ay = 0;
 
+    stopAnimation();
     render();
     startAnimation();
 }
@@ -235,15 +236,27 @@ function startAnimation() {
 
 function stopAnimation() {
     animationStarted = false;
+    if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame);
+    }
 }
+
+let time = Date.now();
+let animationFrame;
 
 function animate() {
     if (!animationStarted) return;
 
-    rotation.ay += Math.PI / 180;
-    render();
+    const now = Date.now();
+    const elapsed = (now - time)/1000;
 
-    window.requestAnimationFrame(event => {
+    if (elapsed > 1/66) {
+        rotation.ay += Math.PI / 180 * 2;
+        render();
+        time = now;
+    }
+
+    animationFrame = window.requestAnimationFrame(event => {
         animate();        
     });
 }
