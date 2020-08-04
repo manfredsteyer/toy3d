@@ -127,6 +127,7 @@ function load(parsedFile) {
     rotation.ay = 0;
 
     render();
+    startAnimation();
 }
 
 function loadCube() {
@@ -239,7 +240,7 @@ function stopAnimation() {
 function animate() {
     if (!animationStarted) return;
 
-    rotation.ay += Math.PI / 180 *2;
+    rotation.ay += Math.PI / 180;
     render();
 
     window.requestAnimationFrame(event => {
