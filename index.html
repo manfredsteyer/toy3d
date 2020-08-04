@@ -25,6 +25,7 @@
         Use <b>arrow keys</b> to rotate the object
     </p>
 
+    <script src="obj-parser.js"></script>
     <script>
 
         const light = normalize(toPoint3d(0, 0, 1));
@@ -38,7 +39,7 @@
         const camera = {
             x: 0, 
             y: 0, 
-            z: 3,
+            z: 30,
             ox: 0,
             oy: 0,
             oz: 0
@@ -107,7 +108,7 @@
         }
 
 
-        const coordsAlt = [
+        const coordsCube = [
             toPoint3d(1, -1, -1),
             toPoint3d(1, -1, 1),
             toPoint3d(-1, -1, 1),
@@ -118,7 +119,7 @@
             toPoint3d(-1, 1, -1)
         ];
 
-        const areasAlt = [
+        const areasCube = [
             [2,3,4],
             [8,7,6],
             [5,6,2],
@@ -133,28 +134,20 @@
             [5,1,8]
         ];
         
-        const coordsOrig = [
-            toPoint3d(1, -1, -1), //1
-            toPoint3d(1, -1, 1), //2
-            toPoint3d(-1, -1, 1), //3
-            toPoint3d(-1, -1, -1), //4
-            toPoint3d(1, 1, -1), //5
-            toPoint3d(1, 1, 1), //6
-            toPoint3d(-1, 1, 1), //7
-            toPoint3d(-1, 1, -1) //8
-        ];
+        // const coords = coordsAlt;
+        // const areas = areasAlt;
 
-        const areasOrig =  [ 
-            [1, 2, 3, 4],
-            [5, 8, 7, 6],
-            [5, 8, 4, 1],
-            [1, 5, 6, 2],
-            [2, 6, 7, 3],
-            [3, 7, 8, 4]
-        ];
+//        let coords, areas;
 
-        const coords = coordsAlt;
-        const areas = areasAlt;
+        const parsedFile = parseObj(cow);
+
+        const coords = parsedFile.coords;
+        const areas = parsedFile.areas;
+
+        const max = Math.max( ...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)] );
+        const recommentedDistance = max + 2;
+        camera.z = recommentedDistance;
+
 
         // https://en.wikipedia.org/wiki/3D_projection
         function project(point3d) {
@@ -220,7 +213,7 @@
             const code = Math.floor(intensity * 255);
 
             // console.debug('intensity', intensity);
-            const rgba =  `rgb(0, ${code/2}, ${code})`;
+            const rgba =  `rgba(0, ${code/2}, ${code}, 255)`;
 
             return rgba;
         }
@@ -265,8 +258,8 @@
             });
 
             for (area of filteredAreas) {
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'black';
+                // ctx.lineWidth = 1;
+                // ctx.strokeStyle = 'black';
                 ctx.fillStyle = calcColor(area);
                 ctx.beginPath();
                 ctx.moveTo(coords2d[area[0]-1].x, coords2d[area[0]-1].y);
@@ -274,7 +267,7 @@
                 ctx.lineTo(coords2d[area[2]-1].x, coords2d[area[2]-1].y);
                 //ctx.lineTo(coords2d[area[3]-1].x, coords2d[area[3]-1].y);
                 ctx.closePath();
-                ctx.stroke();
+                //ctx.stroke();
                 ctx.fill();
             } 
 
@@ -293,20 +286,30 @@
         render();
 
         document.addEventListener('keydown', event => {
-
+            console.debug('e', event);
             switch (event.key) {
                 case 'ArrowLeft':
-                    rotation.ay += Math.PI / 180;
+                    rotation.ay += Math.PI / 180 *2;
                 break;
                 case 'ArrowRight':
-                    rotation.ay -= Math.PI / 180;
+                    rotation.ay -= Math.PI / 180 *2;
                 break;
                 case 'ArrowUp':
-                    rotation.ax -= Math.PI / 180;
+                    rotation.ax -= Math.PI / 180 *2;
                 break;
                 case 'ArrowDown':
-                    rotation.ax += Math.PI / 180;
+                    rotation.ax += Math.PI / 180 *2;
                 break;
+
+                case '+':
+                    camera.z -= 0.2;
+                    break;
+                case '-':
+                    camera.z += 0.2;
+                    break;
+                case '0':
+                    camera.z = recommentedDistance;
+                    break;
                 default: return
             }
 
