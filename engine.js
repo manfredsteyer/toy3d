@@ -139,7 +139,7 @@ function load(parsedFile) {
 
     stopAnimation();
     render();
-    //startAnimation();
+    startAnimation();
 }
 
 function loadCube() {
@@ -307,4 +307,7 @@ function handleInput(key) {
 document.addEventListener(
     'keydown', 
     event => handleInput(event.key));
+
+
+
 
