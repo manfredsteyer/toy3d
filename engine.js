@@ -37,6 +37,17 @@ const areasCube = [
     [5,1,8]
 ];
 
+// const coordsCube = [
+//     toPoint3d(1, 1, 5),
+//     toPoint3d(4, 1, 5),
+//     toPoint3d(3, 4, 5),
+// ];
+
+// const areasCube = [
+//    [1,2,3]
+// ];
+
+
 const rotation = {
     ay: 0,
     ax: 0
@@ -120,15 +131,15 @@ function load(parsedFile) {
     coords = parsedFile.coords;
     areas = parsedFile.areas;
 
-    const max = Math.max( ...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)] );
-    recommentedDistance = max + 2;
+    const max = Math.min( ...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)] );
+    recommentedDistance = max - 2;
     camera.z = recommentedDistance;
     rotation.ax = 0;
     rotation.ay = 0;
 
     stopAnimation();
     render();
-    startAnimation();
+    //startAnimation();
 }
 
 function loadCube() {
@@ -139,7 +150,7 @@ function loadCube() {
 function project(point3d) {
     const x = point3d.x - camera.x;
     const y = point3d.y - camera.y;
-    const z = point3d.z - camera.z;
+    const z = point3d.z - camera.z *-1;
 
     const ex = displaySurface.x;
     const ey = displaySurface.y;
@@ -207,7 +218,7 @@ function render() {
 
         const x = point1.x - camera.x;
         const y = point1.y - camera.y;
-        const z = point1.z - camera.z;
+        const z = point1.z - camera.z *-1;
 
         return (cross.x * x + cross.y * y + cross.z * z) < 0;
     });
@@ -276,10 +287,10 @@ function handleInput(key) {
             rotation.ax += Math.PI / 180 *2;
             break;
         case '+':
-            camera.z -= 0.2;
+            camera.z += 0.2;
             break;
         case '-':
-            camera.z += 0.2;
+            camera.z -= 0.2;
             break;
         case '0':
             camera.z = recommentedDistance;
