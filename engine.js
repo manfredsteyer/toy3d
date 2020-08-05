@@ -5,13 +5,13 @@ const displaySurface = toPoint3d(0, 0, 0.5);
 const camera = {
     x: 0, 
     y: 0, 
-    z: 30,
+    z: 3,
     ox: 0,
     oy: 0,
     oz: 0
-}
+};
 
-const coordsCube = [
+const _coordsCube = [
     toPoint3d(1, -1, -1),
     toPoint3d(1, -1, 1),
     toPoint3d(-1, -1, 1),
@@ -22,7 +22,7 @@ const coordsCube = [
     toPoint3d(-1, 1, -1)
 ];
 
-const areasCube = [
+const _areasCube = [
     [2,3,4],
     [8,7,6],
     [5,6,2],
@@ -37,6 +37,17 @@ const areasCube = [
     [5,1,8]
 ];
 
+
+const coordsCube = [
+    toPoint3d(0, 0, 0),
+    toPoint3d(2, 0, 0),
+    toPoint3d(0, 3, 0)
+];
+
+const areasCube = [
+    [1,2,3]
+]
+
 const rotation = {
     ay: 0,
     ax: 0
@@ -44,8 +55,7 @@ const rotation = {
 
 const canvas = {
     width: 150,
-    height: 150,
-    border: 25
+    height: 150
 }
 
 let coords;
@@ -81,19 +91,20 @@ function rotateY(point3d, alpha) {
     return { x, y, z }; 
 }
 
-// https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_olcEngine3D_Part2.cpp
-function crossProduct(point3d_1, point3d_2, point3d_3) {
-    const line1 = {
-        x: point3d_2.x - point3d_1.x,
-        y: point3d_2.y - point3d_1.y,
-        z: point3d_2.z - point3d_1.z,
+function substract(point3d_1, point3d_2) {
+    const result = {
+        x: point3d_1.x - point3d_2.x,
+        y: point3d_1.y - point3d_2.y,
+        z: point3d_1.z - point3d_2.z,
     };
 
-    const line2 = {
-        x: point3d_3.x - point3d_1.x,
-        y: point3d_3.y - point3d_1.y,
-        z: point3d_3.z - point3d_1.z,
-    };
+    return result;
+}
+
+// https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_olcEngine3D_Part2.cpp
+function crossProduct(point3d_1, point3d_2, point3d_3) {
+    const line1 = substract(point3d_2, point3d_1);
+    const line2 = substract(point3d_3, point3d_1);
 
     const result = {
         x: line1.y * line2.z - line1.z * line2.y,
@@ -122,13 +133,14 @@ function load(parsedFile) {
 
     const max = Math.max( ...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)] );
     recommentedDistance = max + 2;
+    recommentedDistance = camera.z;
     camera.z = recommentedDistance;
     rotation.ax = 0;
     rotation.ay = 0;
 
     stopAnimation();
     render();
-    startAnimation();
+    //startAnimation();
 }
 
 function loadCube() {
@@ -137,6 +149,8 @@ function loadCube() {
 
 // https://en.wikipedia.org/wiki/3D_projection
 function project(point3d) {
+
+
     const x = point3d.x - camera.x;
     const y = point3d.y - camera.y;
     const z = point3d.z - camera.z;
@@ -164,8 +178,8 @@ function project(point3d) {
 }
 
 function toCanvasPoint(point2d) {
-    const x = Math.round(point2d.x * canvas.width + canvas.width /*+  canvas.border*/); 
-    const y = Math.round(point2d.y * canvas.height + canvas.height /*+  canvas.border*/); 
+    const x = Math.round(point2d.x * canvas.width + canvas.width); 
+    const y = Math.round(point2d.y * canvas.height + canvas.height); 
     return { x, y };
 }
 
@@ -226,6 +240,7 @@ function render() {
         ctx.closePath();
         ctx.fill();
     } 
+
 }
 
 function startAnimation() {
