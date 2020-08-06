@@ -127,7 +127,7 @@ function normalize(point3d) {
     return result;
 }
 
-function load(parsedFile) {
+function load(parsedFile, animate) {
     coords = parsedFile.coords;
     areas = parsedFile.areas;
 
@@ -139,7 +139,10 @@ function load(parsedFile) {
 
     stopAnimation();
     render();
-    startAnimation();
+
+    if (animate) {
+        startAnimation();
+    }
 }
 
 function loadCube() {
@@ -148,7 +151,7 @@ function loadCube() {
 
 // https://en.wikipedia.org/wiki/3D_projection
 function project(point3d) {
-    const x = point3d.x - camera.x;
+    const x = point3d.x - camera.x *-1;
     const y = point3d.y - camera.y;
     const z = point3d.z - camera.z *-1;
 
@@ -216,7 +219,7 @@ function render() {
 
         const cross = normalize(crossProduct(point1, point2, point3));
 
-        const x = point1.x - camera.x;
+        const x = point1.x - camera.x *-1;
         const y = point1.y - camera.y;
         const z = point1.z - camera.z *-1;
 
@@ -237,6 +240,8 @@ function render() {
         ctx.closePath();
         ctx.fill();
     } 
+
+    console.debug('camera',camera);
 }
 
 function startAnimation() {
@@ -292,6 +297,14 @@ function handleInput(key) {
         case '-':
             camera.z -= 0.2;
             break;
+
+            case 'a':
+                camera.x -= 0.2;
+                break;
+            case 'd':
+                camera.x += 0.2;
+                break;
+
         case '0':
             camera.z = recommentedDistance;
             rotation.ax = 0;
