@@ -158,11 +158,14 @@ function clip(plane, triple) {
     const { planeNormal, planePoint } = plane;
 
     const distance = (point3d) => {
-        // const result = planeNormal.x * point3d.x + planeNormal.y * point3d.y + planeNormal.z * point3d.z - dotProduct(planeNormal, planePoint);
+        //const result3 = planeNormal.x * point3d.x + planeNormal.y * point3d.y + planeNormal.z * point3d.z - dotProduct(planeNormal, planePoint);
         
         // https://mathinsight.org/distance_point_plane#:~:text=The%20length%20of%20the%20gray,dot%20product%20v%E2%8B%85n.
-        const result = planeNormal.x * (point3d.x - planePoint.x) + planeNormal.y * (point3d.y - planePoint.y) + planeNormal.z * (point3d.z - planePoint.z);
+        //const result = planeNormal.x * (point3d.x - planePoint.x) + planeNormal.y * (point3d.y - planePoint.y) + planeNormal.z * (point3d.z - planePoint.z);
         
+        // dotProduct with normal: length of vector when projected to normal
+        const result = dotProduct(point3d, planeNormal) - dotProduct(planePoint, planeNormal);
+
         return result;
     };
 
@@ -364,6 +367,8 @@ function calcColor(point1, point2, point3) {
     // const point2 = coords3dTransformed[area[1]-1];
     // const point3 = coords3dTransformed[area[2]-1];
     const cross = normalize(crossProduct(point1, point2, point3));
+
+    // cosine similarity b/w two normals
     let intensity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
   
     //const experiment = intensity / 2 + 0.5;
