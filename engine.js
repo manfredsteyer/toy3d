@@ -363,9 +363,6 @@ function toCanvasPoint(point2d) {
 }
 
 function calcColor(point1, point2, point3) {
-    // const point1 = coords3dTransformed[area[0]-1];
-    // const point2 = coords3dTransformed[area[1]-1];
-    // const point3 = coords3dTransformed[area[2]-1];
     const cross = normalize(crossProduct(point1, point2, point3));
 
     // cosine similarity b/w two normals
@@ -420,25 +417,14 @@ function render() {
         return coord;
     }); 
 
-
-    
     const triples = areas.map(area => ([
         coords3dTransformed[area[0]-1],
         coords3dTransformed[area[1]-1],
         coords3dTransformed[area[2]-1]
     ]));
 
-
-
-  //  clippedTriples = triples;
-
-    
-    //clippedTriples = triples;
-
-
-
-
-
+    // clippedTriples = triples;
+    // clippedTriples = triples;
     // sortedTriples = clippedTriples;
 
     let projTriples = triples.map(triple => {
@@ -454,7 +440,6 @@ function render() {
         return result;
     });
 
-
     const filteredTriples = projTriples.filter(triple => {
         const point1 = triple[0];
         const point2 = triple[1];
@@ -468,7 +453,6 @@ function render() {
 
         return (cross.x * x + cross.y * y + cross.z * z) < 0;
     });
-
 
     let clippedTriples = filteredTriples.flatMap(triple => {
 
@@ -485,7 +469,6 @@ function render() {
         return clip(plane, triple);
     });
 
-
     // let filteredclippedTriples = clippedTriples.filter(triple => {
     //     const point1 = triple[0];
     //     const point2 = triple[1];
@@ -500,13 +483,11 @@ function render() {
     //     return (cross.x * x + cross.y * y + cross.z * z) < 0;
     // });
 
-
     clippedTriples = clippedTriples.sort((t1, t2) => {
         const z1 = (t1[0].z + t1[1].z + t1[2].z);
         const z2 = (t2[0].z + t2[1].z + t2[2].z);
         return z1 - z2;
     });
-
    
     const canvasTriples = clippedTriples.map(triple => {
         const color = calcColor(triple[0], triple[1], triple[2]); 
@@ -524,7 +505,6 @@ function render() {
         return result;
 
     });
-
 
      const clippedCanvasTriples = canvasTriples.flatMap(triple => {
         let triples = [triple];
@@ -549,7 +529,6 @@ function render() {
             planeNormal: toPoint3d(-1.0, 0.0, 0.0),
         };   
 
-       
         triples = triples.flatMap(triple => clip(topPlane, triple));
         triples = triples.flatMap(triple => clip(bottomPlane, triple));
         triples = triples.flatMap(triple => clip(leftPlane, triple));
@@ -559,13 +538,6 @@ function render() {
     });
 
     for (const triple of clippedCanvasTriples) {
-
-        // if (triple[0].x < 0 || triple[1].x <0 ||triple[2].x < 0) continue;
-        // if (triple[0].y < 0 || triple[1].y <0 ||triple[2].y < 0) continue;
-        // if (triple[0].x > 300 || triple[1].x >300 ||triple[2].x > 300) continue;
-        // if (triple[0].y > 300 || triple[1].y >300 ||triple[2].y > 300) continue;
-
-
         drawTriangle(triple[0], triple[1], triple[2], triple.color);
     }
 
