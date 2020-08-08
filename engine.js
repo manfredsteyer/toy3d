@@ -127,6 +127,8 @@ function intersectPlane(plane, lineStartPoint3d, lineEndPoint3d) {
     // just to be sure - reconsider this later!
     planeNormal = normalize(planeNormal);
 
+    // dotProduct with normal is vector length when projected to normal
+    // http://www.mathematrix.de/skalarprodukt/
     const planeDot = dotProduct(planeNormal, planePoint);
     const ad = dotProduct(lineStartPoint3d, planeNormal);
     const bd = dotProduct(lineEndPoint3d, planeNormal);
@@ -156,8 +158,11 @@ function clip(plane, triple) {
     const { planeNormal, planePoint } = plane;
 
     const distance = (point3d) => {
-       // normal = normalize(point3d);
-        const result = planeNormal.x * point3d.x + planeNormal.y * point3d.y + planeNormal.z * point3d.z - dotProduct(planeNormal, planePoint);
+        // const result = planeNormal.x * point3d.x + planeNormal.y * point3d.y + planeNormal.z * point3d.z - dotProduct(planeNormal, planePoint);
+        
+        // https://mathinsight.org/distance_point_plane#:~:text=The%20length%20of%20the%20gray,dot%20product%20v%E2%8B%85n.
+        const result = planeNormal.x * (point3d.x - planePoint.x) + planeNormal.y * (point3d.y - planePoint.y) + planeNormal.z * (point3d.z - planePoint.z);
+        
         return result;
     };
 
@@ -359,8 +364,12 @@ function calcColor(point1, point2, point3) {
     // const point2 = coords3dTransformed[area[1]-1];
     // const point3 = coords3dTransformed[area[2]-1];
     const cross = normalize(crossProduct(point1, point2, point3));
-    const intensity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
+    let intensity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
+  
+    //const experiment = intensity / 2 + 0.5;
+    //intensity = experiment;
 
+    //console.assert(experiment >= 0 && experiment <= 1, experiment);
     // console.assert(!isNaN(intensity));
 
     const code = Math.floor(intensity * 255);
