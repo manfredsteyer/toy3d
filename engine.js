@@ -203,9 +203,8 @@ function clip(plane, triple) {
             intersectPlane(plane, insidePoints[0], outsidePoints[0])
         ];
 
-
         let b = [
-            insidePoints[0],
+            insidePoints[1],
             a[2],
             intersectPlane(plane, insidePoints[1], outsidePoints[0]),
         ];
@@ -511,7 +510,6 @@ function render() {
 
 
      const clippedCanvasTriples = canvasTriples.flatMap(triple => {
-
         let triples = [triple];
 
         const leftPlane = {
@@ -534,16 +532,16 @@ function render() {
             planeNormal: toPoint3d(-1.0, 0.0, 0.0),
         };   
 
-        triples = triples.flatMap(triple => clip(leftPlane, triple));
-        triples = triples.flatMap(triple => clip(rightPlane, triple));
+       
         triples = triples.flatMap(triple => clip(topPlane, triple));
         triples = triples.flatMap(triple => clip(bottomPlane, triple));
-        
+        triples = triples.flatMap(triple => clip(leftPlane, triple));
+        triples = triples.flatMap(triple => clip(rightPlane, triple));
         return triples;
 
     });
 
-    for (const triple of canvasTriples) {
+    for (const triple of clippedCanvasTriples) {
 
         // if (triple[0].x < 0 || triple[1].x <0 ||triple[2].x < 0) continue;
         // if (triple[0].y < 0 || triple[1].y <0 ||triple[2].y < 0) continue;
@@ -643,24 +641,24 @@ function handleInput(key) {
             rotation.ax += Math.PI / 180 *2;
             break;
         case '+':
-            camera.z += 0.2;
+            camera.z += 0.4;
             break;
         case '-':
-            camera.z -= 0.2;
+            camera.z -= 0.4;
             break;
 
             case 'a':
-                camera.x -= 0.2;
+                camera.x -= 0.4;
                 break;
             case 'd':
-                camera.x += 0.2;
+                camera.x += 0.4;
                 break;
 
             case 'w':
-                camera.y -= 0.2;
+                camera.y -= 0.4;
                 break;
             case 's':
-                camera.y += 0.2;
+                camera.y += 0.4;
                 break;            
 
         case '0':
