@@ -369,7 +369,10 @@ function calcColor(point1, point2, point3) {
     const cross = normalize(crossProduct(point1, point2, point3));
 
     // cosine similarity b/w two normals
-    let intensity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
+    const cosineSimilarity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
+    
+    // it doen't become blacker ...
+    let intensity = Math.max(0, cosineSimilarity);
   
     //const experiment = intensity / 2 + 0.5;
     //intensity = experiment;
