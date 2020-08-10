@@ -30,13 +30,12 @@
         <a href="javascript:load(parseObj(cow));">Cow</a> |
         <a href="javascript:load(parseObj(teapot));">Teapot</a> |
         <a href="javascript:load(parseObj(teddy));">Teddy Bear</a> |
-        <a href="javascript:load(parseObj(axisModel, false));">Axis</a> |
-        <a href="javascript:load(parseObj(mountains, false));">Mountains</a> 
-
+        <a href="javascript:load(parseObj(axisModel));">Axis</a>
     </p>
 
     <p>
-        Zoom: Use <b>+</b> and <b>-</b> to <a href="javascript:handleInput('+')">zoom in</a> and <a href="javascript:handleInput('-')">zoom out</a>, and <b>0</b> to <a href="javascript:handleInput('0')">reset</a> the zoom and rotation.
+        Load a 3d landscape: 
+        <a href="javascript:load(parseObj(mountains), 'landscape', -10, 18);">Mountains</a> 
     </p>
 
     <p>
@@ -46,7 +45,17 @@
     </p>
     
     <p>
-        Alternative to animation (if you have a keyboard): Use <b>arrow keys</b> to rotate the object. 
+        Move 3D object: <button onclick="handleInput('ArrowLeft')">Left</button><button onclick="handleInput('ArrowRight')">Right</button><button onclick="handleInput('ArrowTop')">Top</button><button onclick="handleInput('ArrowBottom')">Bottom</button>
+    </p>
+    <p>
+        Move 3D object (alternative w/ keyboard): Arraow Keys
+    </p>
+
+    <p>
+        Move Camera: <button onclick="handleInput('a')">Left</button><button onclick="handleInput('d')">Right</button><button onclick="handleInput('w')">Top</button><button onclick="handleInput('s')">Bottom</button>
+    </p>
+    <p>
+        Move Camera (alternative w/ keyboard): a,s,w,d
     </p>
 
     <p>
