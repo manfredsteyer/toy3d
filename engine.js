@@ -445,13 +445,14 @@ function render() {
         const point2 = triple[1];
         const point3 = triple[2];
 
-        const cross = normalize(crossProduct(point1, point2, point3));
+        const normal = normalize(crossProduct(point1, point2, point3));
 
         const x = point1.x;
         const y = point1.y;
         const z = point1.z;
-
-        return (cross.x * x + cross.y * y + cross.z * z) < 0;
+        
+        // Compare normal with vector -- < 0 --> < 90° 
+        return (normal.x * x + normal.y * y + normal.z * z) < 0;
     });
 
     let clippedTriples = filteredTriples.flatMap(triple => {
