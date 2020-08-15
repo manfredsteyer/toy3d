@@ -3,8 +3,8 @@ const light = normalize(toPoint3d(0, 0, 1));
 const displaySurface = toPoint3d(0, 0, 1);
 
 const camera = {
-    x: 0, 
-    y: 0, 
+    x: 0,
+    y: 0,
     z: 30,
     ox: 0,
     oy: 0,
@@ -23,18 +23,18 @@ const coordsCube = [
 ];
 
 const areasCube = [
-    [2,3,4],
-    [8,7,6],
-    [5,6,2],
-    [6,7,3],
-    [3,7,8],
-    [1,4,8],
-    [1,2,4],
-    [5,8,6],
-    [1,5,2],
-    [2,6,3],
-    [4,3,8],
-    [5,1,8]
+    [2, 3, 4],
+    [8, 7, 6],
+    [5, 6, 2],
+    [6, 7, 3],
+    [3, 7, 8],
+    [1, 4, 8],
+    [1, 2, 4],
+    [5, 8, 6],
+    [1, 5, 2],
+    [2, 6, 3],
+    [4, 3, 8],
+    [5, 1, 8]
 ];
 
 const rotation = {
@@ -66,7 +66,10 @@ function rotateX(point3d, alpha) {
     const y = point3d.y * cosa - point3d.z * sina;
     const z = point3d.y * sina + point3d.z * cosa;
 
-    return { x, y, z }; 
+    const u = point3d.u;
+    const v = point3d.v;
+
+    return { x, y, z, u, v };
 }
 
 function rotateY(point3d, alpha) {
@@ -75,9 +78,12 @@ function rotateY(point3d, alpha) {
 
     const x = point3d.x * cosa + point3d.z * sina;
     const y = point3d.y;
-    const z = point3d.x * -sina + point3d.z * cosa; 
+    const z = point3d.x * -sina + point3d.z * cosa;
 
-    return { x, y, z }; 
+    const u = point3d.u;
+    const v = point3d.v;
+
+    return { x, y, z, u, v };
 }
 
 function substract(point3d_1, point3d_2) {
@@ -111,7 +117,7 @@ function dotProduct(point3d_1, point3d_2) {
 
 // https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_olcEngine3D_Part3.cpp
 function intersectPlane(plane, lineStartPoint3d, lineEndPoint3d) {
-    let {planePoint, planeNormal} = plane;
+    let { planePoint, planeNormal } = plane;
 
     // just to be sure - reconsider this later!
     planeNormal = normalize(planeNormal);
@@ -133,7 +139,7 @@ function clip(plane, triple) {
     const insidePoints = [];
     const outsidePoints = [];
 
-    plane = { 
+    plane = {
         planeNormal: normalize(plane.planeNormal),
         planePoint: plane.planePoint
     }
@@ -159,7 +165,6 @@ function clip(plane, triple) {
 
     triple.forEach(p => categorize(p));
 
-
     if (insidePoints.length === 0) {
         return [];
     }
@@ -169,12 +174,11 @@ function clip(plane, triple) {
     }
 
     if (insidePoints.length === 1) {
-        let a =             [
+        let a = [
             insidePoints[0],
             intersectPlane(plane, insidePoints[0], outsidePoints[0]),
             intersectPlane(plane, insidePoints[0], outsidePoints[1]),
         ];
-
 
         a.color = triple.color;
 
@@ -217,8 +221,8 @@ function crossProduct(point3d_1, point3d_2, point3d_3) {
 }
 
 function normalize(point3d) {
-    const length = Math.sqrt(point3d.x*point3d.x + point3d.y*point3d.y + point3d.z*point3d.z);
-    
+    const length = Math.sqrt(point3d.x * point3d.x + point3d.y * point3d.y + point3d.z * point3d.z);
+
     const result = {
         x: point3d.x / length,
         y: point3d.y / length,
@@ -230,13 +234,15 @@ function normalize(point3d) {
 
 let objType;
 let minZ;
+let textures;
 
 function load(parsedFile, type, x, y) {
     coords = parsedFile.coords;
     areas = parsedFile.areas;
+    textures = parsedFile.textures;
 
-    const max = Math.max( ...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)] );
-    recommentedDistance = max + 4;
+    const max = Math.max(...[...coords.map(c => c.x), ...coords.map(c => c.y), ...coords.map(c => c.z)]);
+    recommentedDistance = max + 2;
     camera.z = recommentedDistance;
 
     minZ = Math.min(...coords.map(c => c.z));
@@ -262,11 +268,11 @@ function load(parsedFile, type, x, y) {
 
     stopAnimation();
     render();
-    startAnimation();
+    //startAnimation();
 }
 
 function loadCube() {
-    load({coords: coordsCube, areas: areasCube});
+    load({ coords: coordsCube, areas: areasCube, textures: [[0, 0]] });
 }
 
 // https://en.wikipedia.org/wiki/3D_projection
@@ -287,12 +293,12 @@ function project(point3d) {
     const cy = Math.cos(camera.oy);
     const cz = Math.cos(camera.oz);
 
-    const dx = cy * (sz*y+cz*x) - sy*z;
-    const dy = sx * (cy*z+sy*(sz*y+cz*x)) + cx * (cz*y-sz*x);
-    let dz = cx * (cy*z+sy*(sz*y+cz*x)) - sx * (cz*y-sz*x);
+    const dx = cy * (sz * y + cz * x) - sy * z;
+    const dy = sx * (cy * z + sy * (sz * y + cz * x)) + cx * (cz * y - sz * x);
+    let dz = cx * (cy * z + sy * (sz * y + cz * x)) - sx * (cz * y - sz * x);
 
-    const bx = (ez/dz) * dx + ex;
-    const by = (ez/dz) * dy + ey;
+    const bx = (ez / dz) * dx + ex;
+    const by = (ez / dz) * dy + ey;
 
     return { x: bx, y: by };
 }
@@ -301,6 +307,9 @@ function project3d(point3d) {
     const x = point3d.x - camera.x;
     const y = point3d.y - camera.y;
     const z = point3d.z - camera.z;
+
+    const u = point3d.u;
+    const v = point3d.v;
 
     const ex = displaySurface.x;
     const ey = displaySurface.y;
@@ -314,14 +323,14 @@ function project3d(point3d) {
     const cy = Math.cos(camera.oy);
     const cz = Math.cos(camera.oz);
 
-    const dx = cy * (sz*y+cz*x) - sy*z;
-    const dy = sx * (cy*z+sy*(sz*y+cz*x)) + cx * (cz*y-sz*x);
-    let dz = cx * (cy*z+sy*(sz*y+cz*x)) - sx * (cz*y-sz*x);
+    const dx = cy * (sz * y + cz * x) - sy * z;
+    const dy = sx * (cy * z + sy * (sz * y + cz * x)) + cx * (cz * y - sz * x);
+    let dz = cx * (cy * z + sy * (sz * y + cz * x)) - sx * (cz * y - sz * x);
 
-    const bx = (ez/dz) * dx + ex;
-    const by = (ez/dz) * dy + ey;
+    const bx = (ez / dz) * dx + ex;
+    const by = (ez / dz) * dy + ey;
 
-    return { x: dx, y: dy, z: dz };
+    return { x: dx, y: dy, z: dz, u, v };
 }
 
 function projected3dTo2d(point3d) {
@@ -332,16 +341,28 @@ function projected3dTo2d(point3d) {
     const dy = point3d.y;
     const dz = point3d.z;
 
+    const u = point3d.u;
+    const v = point3d.v;
+
     return {
-        x: (ez/dz) * dx + ex,
-        y: (ez/dz) * dy + ey
+        x: (ez / dz) * dx + ex,
+        y: (ez / dz) * dy + ey,
+        u,
+        v,
+        ez,
+        ex,
+        ey,
+        dz
     };
 }
 
 function toCanvasPoint(point2d) {
-    const x = Math.round(point2d.x * canvas.width + canvas.width /*+  canvas.border*/); 
-    const y = Math.round(point2d.y * canvas.height + canvas.height /*+  canvas.border*/); 
-    return { x, y, z:0 };
+    const x = Math.round(point2d.x * canvas.width + canvas.width /*+  canvas.border*/);
+    const y = Math.round(point2d.y * canvas.height + canvas.height /*+  canvas.border*/);
+    const u = point2d.u; // Math.floor((point2d.u * texWidth/2) + texWidth/2);
+    const v = point2d.v; // Math.floor((point2d.v * texHeight/2) + texHeight/2);
+
+    return { ...point2d, x, y, z: 0, u, v };
 }
 
 function calcColor(point1, point2, point3) {
@@ -349,18 +370,20 @@ function calcColor(point1, point2, point3) {
 
     // cosine similarity b/w two normals
     const cosineSimilarity = cross.x * light.x + cross.y * light.y + cross.z * light.z;
-    
+
     // it doen't become blacker ...
     let intensity = Math.max(0, cosineSimilarity);
-  
+
     const code = Math.floor(intensity * 255);
-    const rgba =  `rgba(0, ${code/2}, ${code}, 255)`;
+    const rgba = `rgba(0, ${code / 2}, ${code}, 255)`;
 
     return rgba;
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, 300, 300);
+
+    for (let i = 0; i <300*300; i++) pDepthBuffer[i] = 0.0;
 }
 
 const ctx = document.getElementById('canvas').getContext('2d');
@@ -385,7 +408,7 @@ function isVisible(triple) {
     const x = point1.x;
     const y = point1.y;
     const z = point1.z;
-    
+
     // Compare normal with vector -- < 0 --> < 90° 
     return (normal.x * x + normal.y * y + normal.z * z) < 0;
 }
@@ -393,7 +416,7 @@ function isVisible(triple) {
 function transform(coord) {
     coord = rotateY(coord, rotation.ay);
     coord = rotateX(coord, rotation.ax)
-    return coord;    
+    return coord;
 }
 
 function clip2d(triple) {
@@ -405,7 +428,7 @@ function clip2d(triple) {
     };
 
     const rightPlane = {
-        planePoint: toPoint3d(0.0, 300-1, 0.0),
+        planePoint: toPoint3d(0.0, 300 - 1, 0.0),
         planeNormal: toPoint3d(0.0, -1.0, 0.0),
     };
 
@@ -415,9 +438,9 @@ function clip2d(triple) {
     };
 
     const bottomPlane = {
-        planePoint: toPoint3d(300-1, 0.0, 0.0),
+        planePoint: toPoint3d(300 - 1, 0.0, 0.0),
         planeNormal: toPoint3d(-1.0, 0.0, 0.0),
-    };   
+    };
 
     triples = triples.flatMap(triple => clip(topPlane, triple));
     triples = triples.flatMap(triple => clip(bottomPlane, triple));
@@ -427,24 +450,33 @@ function clip2d(triple) {
 
 };
 
+
+
 function render() {
     clearCanvas();
 
-    const triples = areas.map(area => ([
-        coords[area[0]-1],
-        coords[area[1]-1],
-        coords[area[2]-1]
-    ]));
-    
+    const triples = areas.map(area => {
+        return [
+            { ...coords[area[0] - 1], ...textures[area[3] - 1] },
+            { ...coords[area[1] - 1], ...textures[area[4] - 1] },
+            { ...coords[area[2] - 1], ...textures[area[5] - 1] }
+        ];
+    });
+
     const screenPlane = {
         planePoint: toPoint3d(0, 0, -1.0),
         planeNormal: toPoint3d(0, 0, -1),
     };
 
     const projTriples = triples.flatMap(triple => {
-        const p1 = transform(triple[0]);
-        const p2 = transform(triple[1]);
-        const p3 = transform(triple[2]);
+
+        const tripleWithTex1 = triple[0];
+        const tripleWithTex2 = triple[1];
+        const tripleWithTex3 = triple[2];
+
+        const p1 = transform(tripleWithTex1);
+        const p2 = transform(tripleWithTex2);
+        const p3 = transform(tripleWithTex3);
 
         const p1_p = project3d(p1);
         const p2_p = project3d(p2);
@@ -463,9 +495,9 @@ function render() {
         const z2 = (t2[0].z + t2[1].z + t2[2].z);
         return z1 - z2;
     });
-   
+
     sorted.forEach(triple => {
-        const color = calcColor(triple[0], triple[1], triple[2]); 
+        const color = calcColor(triple[0], triple[1], triple[2]);
 
         const p1 = projected3dTo2d(triple[0]);
         const p2 = projected3dTo2d(triple[1]);
@@ -475,14 +507,191 @@ function render() {
         const c2 = toCanvasPoint(p2);
         const c3 = toCanvasPoint(p3);
 
-        let triple2d = [c1,c2,c3];
+        let triple2d = [c1, c2, c3];
         triple2d.color = color;
 
         clip2d(triple2d).forEach(triple => {
-            drawTriangle(triple[0], triple[1], triple[2], triple.color);
+            drawTexturedTriangle(triple[0], triple[1], triple[2]);
         });
     });
 }
+
+function subtractCoords(point1, point2) {
+    point1.w = point1.dz;
+    point2.w = point2.dz;
+
+    return {
+        x: Math.floor(point1.x) - Math.floor(point2.x),
+        y: Math.floor(point1.y) - Math.floor(point2.y),
+        z: point1.z - point2.z,
+        u: point1.u - point2.u,
+        v: point1.v - point2.v,
+        w: point1.dz - point2.dz,
+    }
+}
+
+let pDepthBuffer = [];
+
+const texImg = document.createElement('img');
+// texImg.src = 'ST8_Kinoplakat.jpg';
+// const texWidth = 350;
+// const texHeight = 350;
+
+texImg.src = 'coca-cola-zero.jpg';
+texWidth = 512;
+texHeight = 512;
+
+
+function drawTexturedTriangle(point1, point2, point3) {
+
+//    point1.w = point2.w = point3.w = 1;
+    const points = [point1, point2, point3];
+    points.sort((a, b) => a.y - b.y);
+
+    [point1, point2, point3] = points;
+
+    let d1 = subtractCoords(point2, point1);
+    let d2 = subtractCoords(point3, point1);
+
+    let tex_u, tex_v, tex_w;
+
+    let dax_step = 0, dbx_step = 0,
+        du1_step = 0, dv1_step = 0,
+        du2_step = 0, dv2_step = 0,
+        dw1_step = 0, dw2_step = 0;
+
+        if (d1.y) dax_step = d1.x / Math.abs(d1.y);
+    if (d2.y) dbx_step = d2.x / Math.abs(d2.y);
+
+    if (d1.y) du1_step = d1.u / Math.abs(d1.y);
+    if (d1.y) dv1_step = d1.v / Math.abs(d1.y);
+    if (d1.y) dw1_step = d1.w / Math.abs(d1.y);
+
+    if (d2.y) du2_step = d2.u / Math.abs(d2.y);
+    if (d2.y) dv2_step = d2.v / Math.abs(d2.y);
+    if (d2.y) dw2_step = d2.w / Math.abs(d2.y);
+
+    if (d1.y) {
+        for (let i = point1.y; i <= point2.y; i++) {
+            let ax = point1.x + (i - point1.y) * dax_step;
+            let bx = point1.x + (i - point1.y) * dbx_step;
+
+            let tex_su = point1.u + (i - point1.y) * du1_step;
+            let tex_sv = point1.v + (i - point1.y) * dv1_step;
+            let tex_sw = point1.w + (i - point1.y) * dw1_step;
+
+            let tex_eu = point1.u + (i - point1.y) * du2_step;
+            let tex_ev = point1.v + (i - point1.y) * dv2_step;
+            let tex_ew = point1.w + (i - point1.y) * dw2_step;
+
+            if (ax > bx) {
+                [bx, ax] = [ax, bx];
+                [tex_eu, tex_su] = [tex_su, tex_eu];
+                [tex_ev, tex_sv] = [tex_sv, tex_ev];
+                [tex_ew, tex_sw] = [tex_sw, tex_ew];
+            }
+
+            tex_u = tex_su;
+            tex_v = tex_sv;
+            tex_w = tex_sw;
+
+            let tstep = 1.0 / (bx - ax);
+            let t = 0.0;
+
+            for (let j = ax; j < bx; j++) {
+                tex_u = ((1.0 - t) * tex_su + t * tex_eu);
+                tex_v = ((1.0 - t) * tex_sv + t * tex_ev);
+                tex_w = (1.0 - t) * tex_sw + t * tex_ew;
+
+                tex_u = Math.floor((tex_u * texWidth));
+                tex_v = texHeight - Math.floor((tex_v * texHeight));
+
+                //if (tex_w < pDepthBuffer[i*300 + j])
+                {
+                    //Draw(j, i, tex->SampleGlyph(tex_u / tex_w, tex_v / tex_w), tex->SampleColour(tex_u / tex_w, tex_v / tex_w));
+                    ctx.drawImage(texImg, tex_u, tex_v , 1, 1, j, i, 1, 1);
+                    //ctx.drawImage(texImg, tex_u, tex_v);
+                    pDepthBuffer[i * 300 + j] = tex_w;
+                }
+                t += tstep;
+            }
+
+
+        }
+    }
+
+
+
+
+    d1 = subtractCoords(point3, point2);
+
+    if (d1.y) dax_step = d1.x / Math.abs(d1.y);
+    if (d2.y) dbx_step = d2.x / Math.abs(d2.y);
+
+    du1_step = 0, dv1_step = 0;
+    if (d1.y) du1_step = d1.u / Math.abs(d1.y);
+    if (d1.y) dv1_step = d1.v / Math.abs(d1.y);
+    if (d1.y) dw1_step = d1.w / Math.abs(d1.y);
+
+    if (d1.y) {
+        for (let i = point2.y; i <= point3.y; i++) {
+            let ax = point2.x + (i - point2.y) * dax_step;
+            let bx = point1.x + (i - point1.y) * dbx_step;
+
+            let tex_su = point2.u + (i - point2.y) * du1_step;
+            let tex_sv = point2.v + (i - point2.y) * dv1_step;
+            let tex_sw = point2.w + (i - point2.y) * dw1_step;
+
+            let tex_eu = point1.u + (i - point1.y) * du2_step;
+            let tex_ev = point1.v + (i - point1.y) * dv2_step;
+            let tex_ew = point1.w + (i - point1.y) * dw2_step;
+
+            if (ax > bx) {
+                [ax, bx] = [bx, ax];
+                [tex_su, tex_eu] = [tex_eu, tex_su];
+                [tex_sv, tex_ev] = [tex_ev, tex_sv];
+                [tex_sw, tex_ew] = [tex_ew, tex_sw];
+
+            }
+
+            tex_u = tex_su;
+            tex_v = tex_sv;
+            tex_w = tex_sw;
+
+            let tstep = 1.0 / ((bx - ax));
+            let t = 0.0;
+
+            for (let j = ax; j < bx; j++) {
+                tex_u = ((1.0 - t) * tex_su + t * tex_eu);
+                tex_v = ((1.0 - t) * tex_sv + t * tex_ev);
+                tex_w = ((1.0 - t) * tex_sw + t * tex_ew);
+
+                // tex_u =Math.floor(tex_u * texWidth );
+                // tex_v =Math.floor(tex_v * texHeight );
+                tex_u = Math.floor((tex_u * texWidth  ) );
+                tex_v = texHeight - Math.floor((tex_v * texHeight) );
+
+                // if (tex_w < pDepthBuffer[i*300 + j])
+                {
+                    // ctx.beginPath();
+                    // ctx.fillStyle = 'green';
+                    // ctx.rect(Math.floor(j), Math.floor(i), 1, 1);
+                    // ctx.fill();
+
+                    // ctx.drawImage(texImg, tex_u, tex_v, 1, 1, j, i, 1, 1);
+
+                    ctx.drawImage(texImg, tex_u, tex_v, 1, 1, j, i, 1, 1);
+
+                    pDepthBuffer[i * 300 + j] = tex_w;
+                }
+                t += tstep;
+            }
+        }
+    }
+}
+
+
+
 
 function startAnimation() {
     animationStarted = true;
@@ -513,16 +722,16 @@ function animateObj() {
     if (!animationStarted) return;
 
     const now = Date.now();
-    const elapsed = (now - time)/1000;
+    const elapsed = (now - time) / 1000;
 
-    if (elapsed > 1/66) {
+    if (elapsed > 1 / 66) {
         rotation.ay += Math.PI / 180 * 2;
         render();
         time = now;
     }
 
     animationFrame = window.requestAnimationFrame(event => {
-        animate();        
+        animate();
     });
 }
 
@@ -533,61 +742,61 @@ function animateLandscape() {
     if (camera.z <= minZ + 30) return;
 
     const now = Date.now();
-    const elapsed = (now - time)/1000;
+    const elapsed = (now - time) / 1000;
 
-    if (elapsed > 1/66) {
+    if (elapsed > 1 / 66) {
         camera.z -= 0.2;
         render();
         time = now;
     }
 
     animationFrame = window.requestAnimationFrame(event => {
-        animate();        
+        animate();
     });
 }
 
 function handleInput(key) {
     switch (key) {
         case 'ArrowLeft':
-            rotation.ay += Math.PI / 180 *2;
+            rotation.ay += Math.PI / 180 * 2;
             break;
         case 'ArrowRight':
-            rotation.ay -= Math.PI / 180 *2;
+            rotation.ay -= Math.PI / 180 * 2;
             break;
         case 'ArrowUp':
-            rotation.ax -= Math.PI / 180 *2;
+            rotation.ax -= Math.PI / 180 * 2;
             break;
         case 'ArrowDown':
-            rotation.ax += Math.PI / 180 *2;
+            rotation.ax += Math.PI / 180 * 2;
             break;
-      
+
         case 'a':
-            camera.oy -= Math.PI / 180 *2;
+            camera.oy -= Math.PI / 180 * 2;
             break;
         case 'd':
-            camera.oy += Math.PI / 180 *2;
+            camera.oy += Math.PI / 180 * 2;
             break;
         case 'w':
             camera.z -= 0.4;
             break;
         case 's':
             camera.z += 0.4;
-            break;            
+            break;
 
         case '0':
             camera.z = recommentedDistance;
             rotation.ax = 0;
             rotation.ay = 0;
             break;
-        default: 
+        default:
             return;
     }
-    
+
     render();
 }
 
 document.addEventListener(
-    'keydown', 
+    'keydown',
     event => handleInput(event.key));
 
 
