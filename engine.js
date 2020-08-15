@@ -546,6 +546,13 @@ function animateLandscape() {
     });
 }
 
+function move(steps) {
+    const camVec = { x: Math.sin(camera.oy), y: 0, z: Math.cos(camera.oy) };
+    const delta = multiply(camVec, steps);
+    camera.z += delta.z;
+    camera.x += delta.x;
+}
+
 function handleInput(key) {
     switch (key) {
         case 'ArrowLeft':
@@ -562,15 +569,20 @@ function handleInput(key) {
             break;
       
         case 'a':
+
+
+
             camera.oy -= Math.PI / 180 *2;
             break;
         case 'd':
             camera.oy += Math.PI / 180 *2;
             break;
         case 'w':
-            camera.z -= 0.4;
+            // camera.z -= 0.4;
+            move(-0.4);
             break;
         case 's':
+            move(0.4);
             camera.z += 0.4;
             break;            
 
