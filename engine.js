@@ -256,9 +256,8 @@ function load(parsedFile, type, x, y) {
         camera.x = 0;
     }
 
-    rotation.ax = 0;
-    rotation.ay = 0;
     objType = type;
+    reset();
 
     stopAnimation();
     render();
@@ -405,7 +404,7 @@ function clip2d(triple) {
     };
 
     const rightPlane = {
-        planePoint: toPoint3d(0.0, 300-1, 0.0),
+        planePoint: toPoint3d(0.0, 300, 0.0),
         planeNormal: toPoint3d(0.0, -1.0, 0.0),
     };
 
@@ -415,7 +414,7 @@ function clip2d(triple) {
     };
 
     const bottomPlane = {
-        planePoint: toPoint3d(300-1, 0.0, 0.0),
+        planePoint: toPoint3d(300, 0.0, 0.0),
         planeNormal: toPoint3d(-1.0, 0.0, 0.0),
     };   
 
@@ -546,7 +545,16 @@ function animateLandscape() {
     });
 }
 
-function move(steps) {
+function reset() {
+    camera.z = recommentedDistance;
+    rotation.ax = 0;
+    rotation.ay = 0;
+    camera.ox = 0;
+    camera.oy = 0;
+    camera.oz = 0;
+}
+
+function panCamera(steps) {
     const camVec = { x: Math.sin(camera.oy), y: 0, z: Math.cos(camera.oy) };
     const delta = multiply(camVec, steps);
     camera.z += delta.z;
@@ -567,29 +575,20 @@ function handleInput(key) {
         case 'ArrowDown':
             rotation.ax += Math.PI / 180 *2;
             break;
-      
         case 'a':
-
-
-
             camera.oy -= Math.PI / 180 *2;
             break;
         case 'd':
             camera.oy += Math.PI / 180 *2;
             break;
         case 'w':
-            // camera.z -= 0.4;
-            move(-0.4);
+            panCamera(-0.4);
             break;
         case 's':
-            move(0.4);
-            camera.z += 0.4;
+            panCamera(0.4);
             break;            
-
         case '0':
-            camera.z = recommentedDistance;
-            rotation.ax = 0;
-            rotation.ay = 0;
+            reset();
             break;
         default: 
             return;
